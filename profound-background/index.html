@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Background Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-layout">
+        <!-- Left: Canvas Preview -->
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <canvas id="backgroundCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Right: Sidebar Controls -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="7" y="8" width="3" height="3" fill="black"/>
+                    <rect x="7" y="2" width="3" height="3" fill="#C1C2C4"/>
+                    <rect x="1" y="8" width="3" height="3" fill="#919293"/>
+                    <rect x="7" y="14" width="3" height="3" fill="#919293"/>
+                    <rect x="7" y="20" width="3" height="3" fill="#919293"/>
+                    <rect x="1" y="14" width="3" height="3" fill="#C1C2C4"/>
+                    <rect x="1" y="20" width="3" height="3" fill="#DBDBDB"/>
+                    <rect x="1" y="2" width="3" height="3" fill="#DBDBDB"/>
+                    <rect x="19" y="2" width="3" height="3" fill="#DBDBDB"/>
+                    <rect x="19" y="20" width="3" height="3" fill="#DBDBDB"/>
+                    <rect x="13" y="8" width="3" height="3" fill="#919293"/>
+                    <rect x="13" y="2" width="3" height="3" fill="#919293"/>
+                    <rect x="19" y="8" width="3" height="3" fill="#C1C2C4"/>
+                    <rect x="13" y="14" width="3" height="3" fill="black"/>
+                    <rect x="13" y="20" width="3" height="3" fill="#C1C2C4"/>
+                    <rect x="19" y="14" width="3" height="3" fill="#919293"/>
+                </svg>
+                <h1>Pixel Background</h1>
+            </div>
+
+            <div class="scroll-content">
+                <!-- Row 1: Width & Height -->
+                <div class="row">
+                    <div class="col">
+                        <label>Width</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="width" value="1920">
+                            <span class="suffix">px</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label>Height</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="height" value="1080">
+                            <span class="suffix">px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Pixel Size & Gap -->
+                <div class="row">
+                    <div class="col">
+                        <label>Pixel Size</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="size" value="3" step="0.5">
+                            <span class="suffix">px</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label>Gap</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="gap" value="5" step="0.5">
+                            <span class="suffix">px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Colors -->
+                <div class="colors-header">
+                    <label style="margin:0">Colors</label>
+                    <button class="add-btn" id="addInfoBtn">+ Add</button>
+                </div>
+                <div class="colors-list" id="colors-list">
+                    <!-- Color rows will be injected here -->
+                </div>
+
+                <!-- Row 4: Max Opacity -->
+                <div class="col" style="margin-bottom: 20px;">
+                    <label>Max Opacity</label>
+                    <div class="slider-container">
+                        <input type="range" id="max-opacity-range" min="1" max="100" value="20">
+                        <div class="input-wrapper opacity-input-wrapper">
+                            <input type="number" id="max-opacity-num" value="20" min="1" max="100">
+                            <span class="suffix">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-bar">
+                <button id="downloadBtn">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="8" width="1" height="1" fill="white"/>
+                        <rect x="5" y="7" width="1" height="1" fill="white"/>
+                        <rect x="5" y="6" width="1" height="1" fill="white"/>
+                        <rect x="5" y="5" width="1" height="1" fill="white"/>
+                        <rect x="5" y="4" width="1" height="1" fill="white"/>
+                        <rect x="5" y="3" width="1" height="1" fill="white"/>
+                        <rect x="5" y="2" width="1" height="1" fill="white"/>
+                        <rect x="5" y="1" width="1" height="1" fill="white"/>
+                        <rect x="6" y="7" width="1" height="1" fill="white"/>
+                        <rect x="7" y="6" width="1" height="1" fill="white"/>
+                        <rect x="8" y="5" width="1" height="1" fill="white"/>
+                        <rect x="4" y="7" width="1" height="1" fill="white"/>
+                        <rect x="3" y="6" width="1" height="1" fill="white"/>
+                        <rect x="2" y="5" width="1" height="1" fill="white"/>
+                        <rect x="2" y="11" width="1" height="1" fill="white"/>
+                        <rect x="4" y="11" width="1" height="1" fill="white"/>
+                        <rect x="6" y="11" width="1" height="1" fill="white"/>
+                        <rect x="8" y="11" width="1" height="1" fill="white"/>
+                    </svg>
+                    Download
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

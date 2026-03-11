@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Source Code Pro', monospace;
+            padding: 0;
+            margin: 0;
+            color: #000;
+            box-sizing: border-box;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* Top Preview Container (Fixed) */
+        .preview-wrapper {
+            padding: 16px; /* Changed from 8px */
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        #preview-container {
+            width: 100%;
+            height: 80px;
+            background-color: #ffffff; 
+            border: 0.5px solid #dde2e9;
+            border-radius: 4px;
+            box-shadow: 0px 0px 8px 0px #0000000d;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            flex-shrink: 0;
+            padding: 4px; /* Inner padding from design */
+            box-sizing: border-box;
+        }
+
+        /* Scrollable Content Area */
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px; /* Original padding moved here */
+            padding-top: 16px; /* Changed from 10px to match image */
+        }
+
+        /* Bottom Fixed Area */
+        .bottom-bar {
+            padding: 12px 16px 16px;
+            background: #fff;
+            flex-shrink: 0;
+            /* border-top removed */
+        }
+        .preview-dot {
+            /* dynamic size */
+        }
+
+        /* Layout Grid */
+        .row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px; /* Changed from 15px to 24px */
+        }
+        .col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 400; /* Regular */
+            color: rgba(0, 0, 0, 0.68);
+        }
+
+        /* Input Styling */
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 0.5px solid rgba(0, 0, 0, 0.15);
+            background: #fff;
+            height: 30px; /* Fixed height */
+            padding: 0 8px;
+            transition: border-color 0.2s;
+            position: relative;
+            box-sizing: border-box; /* Ensure border is included in height */
+        }
+        
+        .input-wrapper:focus-within {
+            border: 1px solid #000;
+            padding: 0 7.5px; /* Adjust padding to compensate for thicker border (0.5px difference) */
+        }
+
+        input[type="number"], input[type="text"] {
+            border: none;
+            outline: none;
+            width: 100%;
+            height: 100%;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 12px;
+            background: transparent;
+            padding: 0;
+            color: #000;
+        }
+        
+        /* Remove number spinner */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        .suffix {
+            color: #999;
+            font-size: 12px;
+            margin-left: 4px;
+            pointer-events: none;
+        }
+
+        /* Colors Section */
+        .colors-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .add-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 12px;
+            font-weight: 400; /* Regular */
+            color:#000;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .add-btn:hover {
+            opacity: 0.7;
+        }
+
+        .colors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px; /* Changed from 15px to 24px */
+            /* Removed max-height and overflow to allow full expansion */
+        }
+
+        .color-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .color-input-container {
+            flex: 1;
+        }
+
+        .color-preview-box {
+            width: 20px;
+            height: 20px;
+            min-width: 20px; /* Prevent shrinking */
+            min-height: 20px;
+            background-color: #000;
+            border: 0.5px solid rgba(0,0,0,0.1);
+            margin-left: 8px;
+            border-radius: 1px;
+            box-sizing: border-box; /* Include border in size */
+            flex-shrink: 0; /* Prevent flex item shrinking */
+            position: relative; /* For absolute positioning of color input */
+        }
+        
+        .color-picker-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            padding: 0;
+            border: none;
+        }
+
+        .delete-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 0.5px solid rgba(0,0,0,0.15);
+            background: #fff;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .delete-btn:hover {
+            border-color: #000;
+        }
+
+        /* Max Opacity Slider */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type=range] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 2px;
+            background: linear-gradient(to right, #000 0%, #000 20%, #E5E5E5 20%, #E5E5E5 100%);
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #000;
+            cursor: pointer;
+            border: 1px solid #fff; /* Optional styling */
+        }
+        
+        .opacity-input-wrapper {
+            width: 60px;
+        }
+
+        /* Generate Button */
+        #create {
+            width: 100%;
+            height: 44px; /* from screenshot 16_501 css */
+            background-color: #000;
+            color: #fff;
+            border: none;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0; /* Margin handled by padding of container */
+        }
+        #create:hover {
+            background-color: #333;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Preview -->
+    <div class="preview-wrapper">
+        <div id="preview-container"></div>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="scroll-content">
+        <!-- Row 1: Width & Height -->
+        <div class="row">
+            <div class="col">
+                <label>Width</label>
+                <div class="input-wrapper">
+                    <input type="number" id="width" value="1440">
+                    <span class="suffix">px</span>
+                </div>
+            </div>
+            <div class="col">
+                <label>Height</label>
+                <div class="input-wrapper">
+                    <input type="number" id="height" value="900">
+                    <span class="suffix">px</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Pixel Size & Gap -->
+        <div class="row">
+            <div class="col">
+                <label>Pixel Size</label>
+                <div class="input-wrapper">
+                    <input type="number" id="size" value="3" step="0.5">
+                    <span class="suffix">px</span>
+                </div>
+            </div>
+            <div class="col">
+                <label>Gap</label>
+                <div class="input-wrapper">
+                    <input type="number" id="gap" value="5" step="0.5">
+                    <span class="suffix">px</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Colors -->
+        <div class="colors-header">
+            <label style="margin:0">Colors</label>
+            <button class="add-btn" onclick="addColor()">+ Add</button>
+        </div>
+        <div class="colors-list" id="colors-list">
+            <!-- Color rows will be injected here -->
+        </div>
+
+        <!-- Row 4: Max Opacity -->
+        <div class="col" style="margin-bottom: 20px;">
+            <label>Max Opacity</label>
+            <div class="slider-container">
+                <input type="range" id="max-opacity-range" min="1" max="100" value="20">
+                <div class="input-wrapper opacity-input-wrapper">
+                    <input type="number" id="max-opacity-num" value="20" min="1" max="100">
+                    <span class="suffix">%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+        <button id="create">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 5H6V6H5V5Z" fill="white"/>
+                <path d="M5 4H6V5H5V4Z" fill="white"/>
+                <path d="M4 5H5V6H4V5Z" fill="white"/>
+                <path d="M4 6H5V7H4V6Z" fill="white"/>
+                <path d="M3 6H4V7H3V6Z" fill="white"/>
+                <path d="M2 6H3V7H2V6Z" fill="white"/>
+                <path d="M0 6H1V7H0V6Z" fill="white"/>
+                <path d="M4 7H5V8H4V7Z" fill="white"/>
+                <path d="M5 8H6V9H5V8Z" fill="white"/>
+                <path d="M6 4H7V5H6V4Z" fill="white"/>
+                <path d="M6 3H7V4H6V3Z" fill="white"/>
+                <path d="M6 2H7V3H6V2Z" fill="white"/>
+                <path d="M6 0H7V1H6V0Z" fill="white"/>
+                <path d="M5 7H6V8H5V7Z" fill="white"/>
+                <path d="M7 7H8V8H7V7Z" fill="white"/>
+                <path d="M8 7H9V8H8V7Z" fill="white"/>
+                <path d="M8 6H9V7H8V6Z" fill="white"/>
+                <path d="M8 5H9V6H8V5Z" fill="white"/>
+                <path d="M9 6H10V7H9V6Z" fill="white"/>
+                <path d="M10 6H11V7H10V6Z" fill="white"/>
+                <path d="M12 6H13V7H12V6Z" fill="white"/>
+                <path d="M7 5H8V6H7V5Z" fill="white"/>
+                <path d="M7 4H8V5H7V4Z" fill="white"/>
+                <path d="M6 8H7V9H6V8Z" fill="white"/>
+                <path d="M7 8H8V9H7V8Z" fill="white"/>
+                <path d="M6 9H7V10H6V9Z" fill="white"/>
+                <path d="M6 10H7V11H6V10Z" fill="white"/>
+                <path d="M6 12H7V13H6V12Z" fill="white"/>
+            </svg>
+            Generate
+        </button>
+    </div>
+
+    <script>
+        // Icons
+        const trashSvg = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 9H4V8H5V9Z" fill="black"/>
+<path d="M8 9H7V8H8V9Z" fill="black"/>
+<path d="M7 6V8H5V6H7Z" fill="black"/>
+<path d="M5 6H4V5H5V6Z" fill="black"/>
+<path d="M8 6H7V5H8V6Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 3H11V4H10V11H2V4H1V3H4V1H8V3ZM3 10H9V4H3V10ZM5 3H7V2H5V3Z" fill="black"/>
+</svg>`;
+
+        // State
+        const colorsListEl = document.getElementById('colors-list');
+
+        function renderColors() {
+            const rows = colorsListEl.querySelectorAll('.color-row');
+            const isSingle = rows.length <= 1;
+
+            rows.forEach((row, index) => {
+                // Check if delete button exists
+                let deleteBtn = row.querySelector('.delete-btn');
+                
+                if (isSingle) {
+                    if (deleteBtn) deleteBtn.remove();
+                } else {
+                    if (!deleteBtn) {
+                        deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.innerHTML = trashSvg;
+                        deleteBtn.onclick = () => removeColor(row);
+                        row.appendChild(deleteBtn);
+                    }
+                }
+            });
+            updatePreview();
+        }
+
+        function addColor(initialValue = '000000') {
+            const row = document.createElement('div');
+            row.className = 'color-row';
+            
+            // Input Wrapper
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'input-wrapper color-input-container';
+            
+            const prefix = document.createElement('span');
+            prefix.textContent = '#';
+            prefix.style.color = '#333';
+            prefix.style.fontSize = '12px';
+            prefix.style.marginRight = '2px';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = initialValue.replace('#', '');
+            input.placeholder = 'Please enter Hex';
+            input.maxLength = 7; // Allow 7 to handle paste with #, then strip
+            
+            const previewBox = document.createElement('div');
+            previewBox.className = 'color-preview-box';
+            previewBox.style.backgroundColor = '#' + initialValue.replace('#', '');
+            
+            // Create native color picker input
+            const colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.className = 'color-picker-input';
+            
+            // Check if initial value is valid 6-char hex for color input
+            const hexVal = '#' + initialValue.replace('#', '');
+            if (/^#[0-9A-F]{6}$/i.test(hexVal)) {
+                colorPicker.value = hexVal;
+            } else {
+                colorPicker.value = '#000000';
+            }
+            
+            previewBox.appendChild(colorPicker);
+
+            // Input handling
+            input.addEventListener('input', (e) => {
+                let val = e.target.value;
+                // Strip # if present
+                val = val.replace('#', '');
+                // Update input value immediately to remove #
+                e.target.value = val;
+                
+                const fullHex = '#' + val;
+                if (/^#[0-9A-F]{6}$/i.test(fullHex)) {
+                    previewBox.style.backgroundColor = fullHex;
+                    previewBox.style.display = 'block';
+                    colorPicker.value = fullHex;
+                } else {
+                    // Keep previous color if invalid, or hide? 
+                    // Let's keep consistent: hide if invalid
+                    previewBox.style.display = 'none';
+                }
+                updatePreview();
+            });
+            
+            // When color picker changes, update text input and preview
+            colorPicker.addEventListener('input', (e) => {
+                const hex = e.target.value.toUpperCase();
+                input.value = hex.replace('#', '');
+                previewBox.style.backgroundColor = hex;
+                previewBox.style.display = 'block'; 
+                updatePreview();
+            });
+
+            inputContainer.appendChild(prefix);
+            inputContainer.appendChild(input);
+            inputContainer.appendChild(previewBox);
+            
+            row.appendChild(inputContainer);
+            
+            // Insert at the beginning (top) instead of appending
+            if (colorsListEl.firstChild) {
+                colorsListEl.insertBefore(row, colorsListEl.firstChild);
+            } else {
+                colorsListEl.appendChild(row);
+            }
+            
+            renderColors();
+        }
+
+        function removeColor(row) {
+            row.remove();
+            renderColors();
+        }
+
+        // Preview Logic
+        function updatePreview() {
+            const container = document.getElementById('preview-container');
+            container.innerHTML = '';
+            
+            // Get params
+            // const width = 300; // Fixed preview width
+            // const height = 100;
+            const size = parseFloat(document.getElementById('size').value) || 3;
+            const gap = parseFloat(document.getElementById('gap').value) || 5;
+            const maxOp = parseInt(document.getElementById('max-opacity-num').value) || 20;
+            
+            // Get colors
+            const colorInputs = document.querySelectorAll('.color-input-container input[type="text"]');
+            const colors = Array.from(colorInputs).map(i => '#' + i.value).filter(c => /^#[0-9A-F]{6}$/i.test(c));
+            const validColors = colors.length > 0 ? colors : ['#000000'];
+
+            // Calculate grid for preview
+            // To make it look like the full thing but smaller, or just a crop?
+            // "Preview area" usually implies a crop or scaled version. 
+            // Given the fixed height of 100px, let's just fill it with dots.
+            
+            const totalSize = size + gap;
+            const cols = Math.ceil(container.clientWidth / totalSize);
+            const rows = Math.ceil(container.clientHeight / totalSize);
+            
+            const fragment = document.createDocumentFragment();
+            
+            for(let y=0; y<rows; y++) {
+                for(let x=0; x<cols; x++) {
+                    const dot = document.createElement('div');
+                    dot.style.position = 'absolute';
+                    dot.style.left = (x * totalSize) + 'px';
+                    dot.style.top = (y * totalSize) + 'px';
+                    dot.style.width = size + 'px';
+                    dot.style.height = size + 'px';
+                    
+                    const color = validColors[Math.floor(Math.random() * validColors.length)];
+                    
+                    // Opacity logic
+                    const boundary = (maxOp/100) * 0.25;
+                    const isLight = Math.random() < 0.7;
+                    const opacity = isLight 
+                        ? Math.random() * boundary
+                        : boundary + Math.random() * ((maxOp/100) - boundary);
+                    
+                    if (opacity > 0.005) {
+                        dot.style.backgroundColor = color;
+                        dot.style.opacity = opacity;
+                        fragment.appendChild(dot);
+                    }
+                }
+            }
+            container.appendChild(fragment);
+        }
+
+        // Init
+        addColor('#000000');
+        
+        // Listeners for other inputs
+        ['width', 'height', 'size', 'gap'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePreview);
+        });
+
+        // Max Opacity Sync
+        const range = document.getElementById('max-opacity-range');
+        const num = document.getElementById('max-opacity-num');
+        
+        function updateRangeBackground(val) {
+            const percent = ((val - range.min) / (range.max - range.min)) * 100;
+            range.style.background = `linear-gradient(to right, #000 0%, #000 ${percent}%, #E5E5E5 ${percent}%, #E5E5E5 100%)`;
+        }
+
+        range.oninput = () => {
+            num.value = range.value;
+            updateRangeBackground(range.value);
+            updatePreview();
+        };
+        num.oninput = () => {
+            range.value = num.value;
+            updateRangeBackground(num.value);
+            updatePreview();
+        };
+
+        // Generate
+        document.getElementById('create').onclick = () => {
+            const width = parseInt(document.getElementById('width').value, 10);
+            const height = parseInt(document.getElementById('height').value, 10);
+            const size = parseFloat(document.getElementById('size').value);
+            const gap = parseFloat(document.getElementById('gap').value);
+            const maxOpacity = parseInt(document.getElementById('max-opacity-num').value, 10) / 100;
+            
+            const colorInputs = document.querySelectorAll('.color-input-container input[type="text"]');
+            let colors = Array.from(colorInputs).map(i => '#' + i.value).filter(c => /^#[0-9A-F]{6}$/i.test(c));
+            if (colors.length === 0) colors = ['#000000'];
+
+            parent.postMessage({ 
+                pluginMessage: { 
+                    type: 'create-background',
+                    width, height, size, gap, colors, maxOpacity
+                } 
+            }, '*');
+        };
+        
+        // Window resize might need preview update
+        window.onresize = updatePreview;
+
+    </script>
+</body>
+</html>
