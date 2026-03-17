@@ -144,6 +144,20 @@ function removeColor(row) {
 
 // --- Logic ---
 
+const colorRgbCache = new Map();
+function hexToRgbStr(hex) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!m) return '0,0,0';
+    return `${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)}`;
+}
+
+function rebuildColorCache() {
+    colorRgbCache.clear();
+    for (const c of config.colors) {
+        colorRgbCache.set(c, hexToRgbStr(c));
+    }
+}
+
 function updateConfig() {
     config.exportWidth = parseInt(widthInput.value) || 1920;
     config.exportHeight = parseInt(heightInput.value) || 1080;
@@ -161,16 +175,8 @@ function updateConfig() {
 
     totalSize = config.size + config.gap;
     
+    rebuildColorCache();
     resize();
-}
-
-function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 };
 }
 
 function initGrid() {
@@ -189,13 +195,15 @@ function initGrid() {
                 : boundary + Math.random() * (config.maxOpacity - boundary);
             
             const startOp = Math.random() * targetOp;
+            const color = config.colors[Math.floor(Math.random() * config.colors.length)];
 
             grid.push({
                 x: x * totalSize,
                 y: y * totalSize,
                 opacity: startOp,
                 targetOpacity: targetOp,
-                color: config.colors[Math.floor(Math.random() * config.colors.length)],
+                color: color,
+                rgbStr: colorRgbCache.get(color) || '0,0,0',
                 changeTimer: Math.random() * 60
             });
         }
@@ -231,6 +239,7 @@ function draw() {
     ctx.clearRect(0, 0, width, height);
     
     ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 1;
     ctx.fillRect(0, 0, width, height);
     
     const boundary = config.maxOpacity * 0.25;
@@ -249,19 +258,20 @@ function draw() {
              cell.targetOpacity = newTarget;
              cell.changeTimer = 30 + Math.random() * 90;
              cell.color = config.colors[Math.floor(Math.random() * config.colors.length)];
+             cell.rgbStr = colorRgbCache.get(cell.color) || '0,0,0';
         }
 
         // Lerp opacity
         cell.opacity += (cell.targetOpacity - cell.opacity) * 0.05;
         
         if (cell.opacity > 0.005) {
-            // Parse hex color to rgba
-            const rgb = hexToRgb(cell.color);
-            ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${cell.opacity})`;
+            ctx.globalAlpha = cell.opacity;
+            ctx.fillStyle = `rgb(${cell.rgbStr})`;
             ctx.fillRect(cell.x, cell.y, config.size, config.size);
         }
     }
     
+    ctx.globalAlpha = 1;
     requestAnimationFrame(draw);
 }
 
